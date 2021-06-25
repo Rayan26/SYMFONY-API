@@ -1,0 +1,33 @@
+  version:  '3.8'
+  services:
+    mysql:
+      image: mysql:8.0
+      restart: on-failure
+      environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: smart
+    adminer:
+      image: adminer
+      restart: on-failure
+      ports:
+        - '8080:8080'
+    nginx:
+      image: nginx:1.19.0-alpine
+      restart: on-failure
+      volumes:
+        - './apps/apisymfony/public/:/usr/src/app'
+        - './docker/nginx/default.conf:/etc/nginx/conf.d'
+      ports:
+        - '80:80'
+      depends_on:
+        - php
+    php:
+      build:
+        context: .
+        dockerfile: ./apps/apisymfony/docker/php/Dockerfile
+      volumes:
+        - './apps/apisymfony/:/usr/src/app'
+      restart: on-failure
+      env_file:
+        - .env
+      user: 1000:1000
